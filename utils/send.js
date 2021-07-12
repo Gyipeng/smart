@@ -13,9 +13,7 @@ module.exports = function(email,code){
         // 邮件内容，HTML格式
         text: '您好！', //接收激活请求的链接
         html: `<p>感谢您的注册，请点击这里激活您的账号</p>
-     <p><a href="http://localhost:3200/users/checkCode?email=${email}&code=${code}">思迈特软件欢迎您</a></p>
-     <p>祝您使用愉快，使用过程中您有任何问题请及时联系我们。</p>
-     <p>温馨提示：不要泄漏给其他人，如果无法点击，请复制地址粘贴到浏览器地址栏中按回车。</p>`
+     <p><a href="./users/active?email=${email}&code=${code}">思迈特软件欢迎您</a></p>`
     };
     send(mail)
 };

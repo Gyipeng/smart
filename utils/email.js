@@ -1,29 +1,21 @@
+const {emailConfig} = require('../utils/constant')
 // 引入 nodemailer
 var nodemailer = require('nodemailer');
 
-// 创建一个SMTP客户端配置
-var config = {
-    host: 'smtp.qq.com',
-    port: 465,
-    secure: true, // true for 465, false for other ports
-    auth: {
-        user: '826256407@qq.com', //刚才注册的邮箱账号
-        pass: 'mrjvsewfkuhrbdjh'  //邮箱的授权码，不是注册时的密码
-    }
-};
-
 // 创建一个SMTP客户端对象
-var transporter = nodemailer.createTransport(config);
+var transporter = nodemailer.createTransport(emailConfig);
+
+const SendEmail = async (email, subject, text, html) => {
+    return await transporter.sendMail({
+        from: emailConfig.auth.user, // 发送者邮箱地址
+        to: email,                   // 接收这邮箱地址
+        subject,                     // 邮件主题
+        html,                        // html模板
+        text                         // 文本内容
+    })
+}
 
 // 发送邮件
-module.exports = function (mail){
-    return new Promise((resolve, reject) => {
-    transporter.sendMail(mail, function(error, info){
-        if(error) {
-            reject('验证失败')
-            return console.log(error);
-        }
-        resolve()
-        console.log('mail sent:', info.response);
-    })});
-};
+module.exports = {
+    SendEmail
+}
