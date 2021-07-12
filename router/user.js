@@ -22,6 +22,18 @@ const {SendEmail} = require("../utils/email")
 const bcrypt = require('bcrypt-nodejs')
 const captchapng = require("captchapng")
 
+/**
+ * 异常说明
+ * code 400  服务器异常
+ * code 201 成功
+ * code 409 '参数错误'
+ * code 404  资源找不到
+ * code 403  禁止访问
+ * code 401  授权失败
+ * code 408 资源存在
+ * code 0   失败
+ */
+
 @controller('/users')
 class UserController {
     /**
@@ -181,7 +193,7 @@ class UserController {
         if (user) {
             return res.send({code: 201, msg: '成功', data: user})
         }
-        return res.send({code: 405, msg: '失败', data: user})
+        return res.send({code: 0, msg: '失败', data: user})
     }
 
     @get("/checkLogin")
