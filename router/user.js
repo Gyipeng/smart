@@ -51,21 +51,24 @@ class UserController {
         const pass = bcrypt.hashSync(password, salt);
         const saltcode = bcrypt.genSaltSync(2);
         const code = bcrypt.hashSync(name, saltcode);
-
-        const user = await addUser({name, pass, email, isLive: false, errorNum: 0, disable: false, role: "user",code})
-        if (user) {
-            req.session.user = {
-                _id: user._id,
-                name: user.name,
-                role: user.role,
-                email: user.user
-            };
+        try {
             const subject = "账号注册";
             const text = "text";
             const html = `<p>感谢您的注册，请点击这里激活您的账号</p>
             <p><a href="http://${address.ip()}:3200/users/active?email=${email}&code=${code}">思迈特软件欢迎您</a></p>`;
             await SendEmail(email, subject, text, html);
+            const user = await addUser({name, pass, email, isLive: false, errorNum: 0, disable: false, role: "user",code})
+            if (user) {
+                req.session.user = {
+                    _id: user._id,
+                    name: user.name,
+                    role: user.role,
+                    email: user.user
+                };
+            }
             return res.send(new Success("注册成功，请移步到邮箱激活"))
+        }catch (e) {
+            res.send(new HttpException("注册失败"))
         }
     }
 
@@ -99,7 +102,7 @@ class UserController {
             if (user.user.role == "admin") {
                 return res.send(new HttpException(`密码错误`, 0, 0))
             }
-            let userByEmail = await updateUser(user.user.email, {errorNum: ++user.user.errorNum})
+            let userByEmail = await updateUser(user.user.email, {errorNum: ++user.user.errorNum,disable:user.user.errorNum>=3})
             return res.send(new HttpException(`密码错误${user.user.errorNum}次`, 0, 0))
         }
         req.session.user = {
