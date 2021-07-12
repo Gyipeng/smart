@@ -10,8 +10,8 @@ const getUserList = async (obj, pageSize, page) => {
     return users
 }
 
-const getUserOne = async (email) => {
-    const user = await User.findOne({email})
+const getUserOne = async (obj) => {
+    const user = await User.findOne(obj)
     return user
 }
 
@@ -34,9 +34,9 @@ const updateUser = async (email, user) => {
 
 }
 
-const checkPassword = async (name, password) => {
+const checkPassword = async (obj, password) => {
     let match = false
-    const user = await User.findOne({name: name}).exec()
+    const user = await User.findOne(obj).exec()
     if (user) {
         match = await user.comparePassword(password, user.pass)
     }

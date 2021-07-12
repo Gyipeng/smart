@@ -37,31 +37,29 @@ class UserController {
     async addUser(req, res, next) {
         const {name, password, email} = req.body;
         const userExist = await getUserOneByName(name)
-        const emailExist = await getUserOne(email)
+        const emailExist = await getUserOne({email})
         if (userExist) {
             return res.send(new ExistHttpException("用户名已经存在"))
-        }
-        if (emailExist) {
-            return res.send(new ExistHttpException("邮箱已经存在"))
         }
         if (!regEmail.test(email)) {
             return res.send(new HttpException('邮箱格式不对', 0, 0))
         }
+        if (emailExist) {
+            return res.send(new ExistHttpException("邮箱已经存在"))
+        }
         const salt = bcrypt.genSaltSync(2);
         const pass = bcrypt.hashSync(password, salt);
+        const saltcode = bcrypt.genSaltSync(2);
+        const code = bcrypt.hashSync(name, saltcode);
 
-        const user = await addUser({name, pass, email, isLive: false, errorNum: 0, disable: false, role: "user"})
+        const user = await addUser({name, pass, email, isLive: false, errorNum: 0, disable: false, role: "user",code})
         if (user) {
-            const salt = bcrypt.genSaltSync(2);
-            const code = bcrypt.hashSync(user.name, salt);
             req.session.user = {
                 _id: user._id,
                 name: user.name,
                 role: user.role,
                 email: user.user
             };
-            req.session[email] = code
-
             const subject = "账号注册";
             const text = "text";
             const html = `<p>感谢您的注册，请点击这里激活您的账号</p>
@@ -86,7 +84,7 @@ class UserController {
         if (req.session.code != code) {
             return res.send(new HttpException('验证码错误', 0, 0))
         }
-        const user = await checkPassword(name, password)
+        const user = await checkPassword({name}, password)
         if (!user.user) {
             return res.send(new HttpException('账号查找不到', 0, 0))
         }
@@ -110,7 +108,6 @@ class UserController {
             role: user.user.role
         }
         res.send({msg: "登陆成功", data: user.user, code: 201})
-
     }
 
     /**
@@ -121,11 +118,14 @@ class UserController {
     @get('/active')
     async active(req, res, next) {
         let {code, email} = req.query;
+        const userExist = await getUserOne({code})
+        if (!userExist){
+            return res.send(new HttpException("激活失败", 0, 0))
+        }
         let user = await updateUser(email, {isLive: true})
         if (user) {
             return res.redirect(`http://${address.ip()}:8089`)
         }
-        return res.send(new HttpException("激活失败", 0, 0))
     }
 
     /**
@@ -173,13 +173,20 @@ class UserController {
     @adminRole("admin")
     async updateDisable(req, res) {
         let {email, disable} = req.body
-        let errorNum = disable == "ture" ? 3 : 0
+        let errorNum = disable == "true" ? 3 : 0
         let user = await updateUser(email, {disable, errorNum})
         if (user) {
             return res.send({code: 201, msg: '成功', data: user})
         }
         return res.send({code: 405, msg: '失败', data: user})
     }
+
+    @get("/checkLogin")
+    @authUser
+    async checkLogin(req, res) {
+        return res.send(new Success())
+    }
+
 }
 
 module.exports = {
