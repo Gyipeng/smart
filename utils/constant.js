@@ -1,5 +1,5 @@
 const regEmail = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/ //验证邮箱正则
-const  emailConfig = {
+const emailConfig = {
     host: 'smtp.qq.com',
     port: 465,
     secure: true, // true for 465, false for other ports
@@ -9,8 +9,7 @@ const  emailConfig = {
     }
 };
 
-
-module.exports={
+module.exports = {
     regEmail,
     emailConfig
 }

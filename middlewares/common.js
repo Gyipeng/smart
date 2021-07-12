@@ -1,6 +1,5 @@
 const bodyParser = require('body-parser')
 const session = require('express-session')
-const parseurl = require('parseurl')
 
 
 
